@@ -44,6 +44,7 @@ VERB_SUFF_FUT = "VERB_SUFF_FUT"
 NUM = "NUM"
 MGA = "MGA"
 KA = "KA"
+AN = "AN"
 IKA = "IKA"
 NGA = "NGA"
 CLIT_Y = "CLIT_Y"
@@ -584,11 +585,11 @@ class Parser(object):
         if CONJ in self.current_token.type:
             conjunct = self.current_token
             self.eat(CONJ)
-            return self.sentence_part_extra(left, conj)
+            return self.sentence_part_extra(left, conjunct)
         elif COMMA in self.current_token.type:
             conjunct = self.current_token
             self.eat(COMMA)
-            return self.sentence_part_extra(left, conj)
+            return self.sentence_part_extra(left, conjunct)
         else:
             return SentencePart(left)
 
@@ -685,7 +686,7 @@ class Parser(object):
                     words_p,
                 )
             )
-        elif one.content is None and (two.content is not None and words_s in suff):
+        elif one.content is None and (two.content is not None and two.content in words_s):
             errors.append(
                 Error(
                     two.type + " from root " + root,
@@ -885,7 +886,7 @@ class Parser(object):
             element = self.time()
             if ADV_SPE in self.current_token.type:
                 opt = self.current_token
-                eat(ADV_SPE)
+                self.eat(ADV_SPE)
                 return Adverb(element, Word(opt, ADV_SPE))
             else:
                 return Adverb(element)
@@ -903,7 +904,7 @@ class Parser(object):
             self.eat(ADV)
             if ADV_SPE in self.current_token.type:
                 opt = self.current_token
-                eat(ADV_SPE)
+                self.eat(ADV_SPE)
                 return Adverb(Word(element, ADV), Word(opt, ADV_SPE))
             else:
                 return Adverb(Word(element, ADV))
@@ -1586,7 +1587,7 @@ class Parser(object):
                 nga.append(Word(self.current_token, NGA))
                 self.eat(NGA)
             else:
-                nga.append(Word(Token(["NG_PREFIX"], extta), "NG_PREFIX"))
+                nga.append(Word(Token(["NG_PREFIX"], extra), "NG_PREFIX"))
             if ADJ in self.current_token.type:
                 current = self.current_token
                 extra = stemmer.stem_word(current.value, as_object=True).prefix
