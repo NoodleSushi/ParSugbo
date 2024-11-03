@@ -1,3 +1,4 @@
+from collections import defaultdict
 from cebdict import dictionary
 from cebstemmer import stemmer
 from .tokens import *
@@ -8,6 +9,35 @@ from .literals import *
 #  LEXER                                                                      #
 #                                                                             #
 ###############################################################################
+
+LITERALS_TOKEN_PAIRS  = [
+    (LITERALS_MONTHS, TOKEN_MONTH),
+    (LITERALS_HOURS, TOKEN_HOUR),
+    (LITERALS_TIMES_OF_DAY, TOKEN_TIME_OF_DAY),
+    (LITERALS_DETS, TOKEN_DET),
+    (LITERALS_INTER, TOKEN_INT),
+    (LITERALS_PREPS, TOKEN_PREP),
+    (LITERALS_TIME_NOUNS, TOKEN_TIME_NOUN),
+    (LITERALS_POS_LINKS, TOKEN_POS_LINK),
+    (LITERALS_TIME_NOUNS_A, TOKEN_TIME_NOUN_A),
+    (LITERALS_TIMES, TOKEN_TIME),
+    (LITERALS_PRON_DEMS, TOKEN_PRON_DEM),
+    (LITERALS_ADV_SPECS, TOKEN_ADV_SPE),
+    (LITERALS_PLURAL_DETS, TOKEN_DET_PLURAL),
+    (LITERALS_PRON_PER_SINGS, TOKEN_PRON_PER),
+    (LITERALS_PRON_PER_PLURALS, TOKEN_PRON_PER_PLURAL),
+    (LITERALS_PRON_POS_SINGS, TOKEN_PRON_POS),
+    (LITERALS_PRON_POS_PLURALS, TOKEN_PRON_POS_PLURAL),
+    (LITERALS_PRON_POS_N_SINGS, TOKEN_PRON_POS_N),
+    (LITERALS_PRON_POS_N_PLURALS, TOKEN_PRON_POS_PLURAL_N),
+    (LITERALS_PRON_POS_SINGS_NG, TOKEN_PRON_POS_NG),
+    (LITERALS_PRON_POS_PLURALS_NG, TOKEN_PRON_POS_PLURAL_NG),
+]
+
+LITERAL_TOKEN_MAP = defaultdict(list)
+for literals, token in LITERALS_TOKEN_PAIRS:
+    for literal in literals:
+        LITERAL_TOKEN_MAP[literal].append(token)
 
 class Token(object):
     def __init__(self, type: list[str], value: str | int):
@@ -76,48 +106,8 @@ class Lexer(object):
 
     def general(self, given: str):
         ret = []
-        if given in LITERALS_MONTHS:
-            ret += [TOKEN_MONTH]
-        if given in LITERALS_HOURS:
-            ret += [TOKEN_HOUR]
-        if given in LITERALS_TIMES_OF_DAY:
-            ret += [TOKEN_TIME_OF_DAY]
-        if given in LITERALS_DETS:
-            ret += [TOKEN_DET]
-        if given in LITERALS_INTER:
-            ret += [TOKEN_INT]
-        if given in LITERALS_PREPS:
-            ret += [TOKEN_PREP]
-        if given in LITERALS_TIME_NOUNS:
-            ret += [TOKEN_TIME_NOUN]
-        if given in LITERALS_POS_LINKS:
-            ret += [TOKEN_POS_LINK]
-        if given in LITERALS_TIME_NOUNS_A:
-            ret += [TOKEN_TIME_NOUN_A]
-        if given in LITERALS_TIMES:
-            ret += [TOKEN_TIME]
-        if given in LITERALS_PRON_DEMS:
-            ret += [TOKEN_PRON_DEM]
-        if given in LITERALS_ADV_SPECS:
-            ret += [TOKEN_ADV_SPE]
-        if given in LITERALS_PLURAL_DETS:
-            ret += [TOKEN_DET_PLURAL]
-        if given in LITERALS_PRON_PER_SINGS:
-            ret += [TOKEN_PRON_PER]
-        if given in LITERALS_PRON_PER_PLURALS:
-            ret += [TOKEN_PRON_PER_PLURAL]
-        if given in LITERALS_PRON_POS_SINGS:
-            ret += [TOKEN_PRON_POS]
-        if given in LITERALS_PRON_POS_PLURALS:
-            ret += [TOKEN_PRON_POS_PLURAL]
-        if given in LITERALS_PRON_POS_N_SINGS:
-            ret += [TOKEN_PRON_POS_N]
-        if given in LITERALS_PRON_POS_N_PLURALS:
-            ret += [TOKEN_PRON_POS_PLURAL_N]
-        if given in LITERALS_PRON_POS_SINGS_NG:
-            ret += [TOKEN_PRON_POS_NG]
-        if given in LITERALS_PRON_POS_PLURALS_NG:
-            ret += [TOKEN_PRON_POS_PLURAL_NG]
+        if given in LITERAL_TOKEN_MAP:
+            ret += LITERAL_TOKEN_MAP[given]
         picked = stemmer.stem_word(given, as_object=True).root
         types = dictionary.search(picked)
         if types == None:
