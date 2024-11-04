@@ -40,8 +40,8 @@ for literals, token in LITERALS_TOKEN_PAIRS:
         LITERAL_TOKEN_MAP[literal].append(token)
 
 class Token(object):
-    def __init__(self, type: list[str], value: str | int):
-        self.type = type
+    def __init__(self, types: list[str], value: str | int):
+        self.types = types
         self.value = value
 
     def __str__(self):
@@ -51,7 +51,7 @@ class Token(object):
             Token(PLUS, '+')
             Token(MUL, '*')
         """
-        return "Token({type}, {value})".format(type=self.type, value=repr(self.value))
+        return "Token({types}, {value})".format(types=self.types, value=repr(self.value))
 
     def __repr__(self):
         return self.__str__()

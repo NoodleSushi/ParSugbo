@@ -211,14 +211,14 @@ class Parser(object):
         # type and if they match then "eat" the current token
         # and assign the next token to the self.current_token,
         # otherwise raise an exception.
-        # print (self.current_token.type+" "+token_type)
+        # print (self.current_token.types+" "+token_type)
         # print ("eee")
-        if token_type in self.current_token.type:
+        if token_type in self.current_token.types:
             self.current_token = self.lexer.get_next_token()
         else:
             self.errors.append(
                 Error(
-                    "Wrong syntax: " + ", ".join(self.current_token.type),
+                    "Wrong syntax: " + ", ".join(self.current_token.types),
                     token_type,
                     self.current_token.value,
                 )
@@ -226,7 +226,7 @@ class Parser(object):
 
     def contain(self, words):
         result = False
-        for x in self.current_token.type:
+        for x in self.current_token.types:
             if x in words:
                 result = True
                 break
@@ -238,11 +238,11 @@ class Parser(object):
         """
         left = self.sentence()
 
-        if TOKEN_CONJ in self.current_token.type:
+        if TOKEN_CONJ in self.current_token.types:
             conjunct = self.current_token
             self.eat(TOKEN_CONJ)
             return self.sentence_part_extra(left, conjunct)
-        elif TOKEN_COMMA in self.current_token.type:
+        elif TOKEN_COMMA in self.current_token.types:
             conjunct = self.current_token
             self.eat(TOKEN_COMMA)
             return self.sentence_part_extra(left, conjunct)
@@ -302,7 +302,7 @@ class Parser(object):
         """pred_phrase : verb_phrase (adverb)?
         | predicate (adverb)? verb_phrase (adverb)?
         """
-        if TOKEN_VERB in self.current_token.type:
+        if TOKEN_VERB in self.current_token.types:
             verb_phrase = self.verb_phrase()
             end_adv = self.adverb()
             self.tenses(verb_phrase, end_adv)
@@ -311,7 +311,7 @@ class Parser(object):
             predicate = self.predicate()
             mid_adv = self.adverb()
             verb_phrase = (
-                self.verb_phrase() if TOKEN_VERB in self.current_token.type else None
+                self.verb_phrase() if TOKEN_VERB in self.current_token.types else None
             )
             end_adv = self.adverb()
             self.tenses(verb_phrase, end_adv, mid_adv)
@@ -424,7 +424,7 @@ class Parser(object):
             or self.current_token.value == "ka"
         ):
             end = self.noun_phrase_part()
-        elif TOKEN_PREP in self.current_token.type:
+        elif TOKEN_PREP in self.current_token.types:
             end = self.prep_phrase()
         return VerbPhrase(verb, end)
 
@@ -452,7 +452,7 @@ class Parser(object):
             suff_tense.append("PRESENT_SUFFIX")
         suff = ", ".join(suff_tense) if len(suff_tense) > 0 else "SUFFIX"
         pre = ", ".join(pref_tense) if len(pref_tense) > 0 else "PREFIX"
-        if TOKEN_CLIT_Y in self.current_token.type:
+        if TOKEN_CLIT_Y in self.current_token.types:
             clit = self.current_token
             self.eat(TOKEN_CLIT_Y)
             return VerbComplex(
@@ -495,9 +495,9 @@ class Parser(object):
             thing = element = self.noun_phrase_part()
         elif self.contain([TOKEN_PLACE, TOKEN_ADJ, TOKEN_ADV, TOKEN_ADV_SPE]):
             thing = element = self.descriptive()
-        elif TOKEN_PREP in self.current_token.type:
+        elif TOKEN_PREP in self.current_token.types:
             thing = element = self.prep_phrase()
-        elif TOKEN_INT in self.current_token.type:
+        elif TOKEN_INT in self.current_token.types:
             element = self.current_token
             self.eat(TOKEN_INT)
             thing = Word(element, TOKEN_INT)
@@ -509,7 +509,7 @@ class Parser(object):
         """descriptive : ADJ
         | adverb
         """
-        if TOKEN_ADJ in self.current_token.type:
+        if TOKEN_ADJ in self.current_token.types:
             element = self.current_token
             self.eat(TOKEN_ADJ)
             thing = Word(element, TOKEN_ADJ)
@@ -526,7 +526,7 @@ class Parser(object):
         | DILI (ADV_SPE)?
         | empty
         """
-        if TOKEN_PLACE in self.current_token.type:
+        if TOKEN_PLACE in self.current_token.types:
             place = self.current_token
             self.eat(TOKEN_PLACE)
             if self.contain([TOKEN_TIME, TOKEN_NIAGING, TOKEN_SUNOD, TOKEN_KARONG]):
@@ -534,31 +534,31 @@ class Parser(object):
                 return Adverb(Word(place, TOKEN_PLACE), time)
             else:
                 return Adverb(Word(place, TOKEN_PLACE))
-        elif TOKEN_ADV_SPE in self.current_token.type:
+        elif TOKEN_ADV_SPE in self.current_token.types:
             element = self.current_token
             self.eat(TOKEN_ADV_SPE)
             return Adverb(Word(element, TOKEN_ADV_SPE))
         elif self.contain([TOKEN_TIME, TOKEN_NIAGING, TOKEN_SUNOD, TOKEN_KARONG, TOKEN_HOUR]):
             element = self.time()
-            if TOKEN_ADV_SPE in self.current_token.type:
+            if TOKEN_ADV_SPE in self.current_token.types:
                 opt = self.current_token
                 self.eat(TOKEN_ADV_SPE)
                 return Adverb(element, Word(opt, TOKEN_ADV_SPE))
             else:
                 return Adverb(element)
-        elif TOKEN_ADV in self.current_token.type and self.current_token.value == "alas":
+        elif TOKEN_ADV in self.current_token.types and self.current_token.value == "alas":
             element = self.current_token
             self.eat(TOKEN_ADV)
             time = self.time()
             return Adverb(Word(element, TOKEN_ADV), time)
-        elif TOKEN_ADV in self.current_token.type:
+        elif TOKEN_ADV in self.current_token.types:
             element = self.current_token
             self.eat(TOKEN_ADV)
             return Adverb(Word(element, TOKEN_ADV))
-        elif TOKEN_ADV in self.current_token.type and self.current_token.value == "dili":
+        elif TOKEN_ADV in self.current_token.types and self.current_token.value == "dili":
             element = self.current_token
             self.eat(TOKEN_ADV)
-            if TOKEN_ADV_SPE in self.current_token.type:
+            if TOKEN_ADV_SPE in self.current_token.types:
                 opt = self.current_token
                 self.eat(TOKEN_ADV_SPE)
                 return Adverb(Word(element, TOKEN_ADV), Word(opt, TOKEN_ADV_SPE))
@@ -574,18 +574,18 @@ class Parser(object):
         | KARONG TOKEN_TIME_NOUN_A
         | HOUR sa TIME_OF_DAY
         """
-        if TOKEN_TIME in self.current_token.type:
+        if TOKEN_TIME in self.current_token.types:
             time = self.current_token
             self.eat(TOKEN_TIME)
             return Time(Word(time, TOKEN_TIME))
-        elif TOKEN_NIAGING in self.current_token.type:
+        elif TOKEN_NIAGING in self.current_token.types:
             time = self.current_token
             self.eat(TOKEN_NIAGING)
             num = self.adj_num()
             noun = self.current_token
             self.eat(TOKEN_TIME_NOUN)
             return Time(Word(time, TOKEN_NIAGING), num, Word(noun, TOKEN_TIME_NOUN))
-        elif TOKEN_SUNOD in self.current_token.type:
+        elif TOKEN_SUNOD in self.current_token.types:
             times = []
             times.append(Word(self.current_token, TOKEN_SUNOD))
             self.eat(TOKEN_SUNOD)
@@ -595,13 +595,13 @@ class Parser(object):
             noun = self.current_token
             self.eat(TOKEN_TIME_NOUN)
             return Time(times, num, Word(noun, TOKEN_TIME_NOUN))
-        elif TOKEN_KARONG in self.current_token.type:
+        elif TOKEN_KARONG in self.current_token.types:
             time = self.current_token
             self.eat(TOKEN_KARONG)
             noun = self.current_token
             self.eat(TOKEN_TIME_NOUN_A)
             return Time(Word(time, TOKEN_KARONG), day=Word(noun, TOKEN_TIME_NOUN_A))
-        elif TOKEN_HOUR in self.current_token.type:
+        elif TOKEN_HOUR in self.current_token.types:
             time = self.current_token
             self.eat(TOKEN_HOUR)
             if self.current_token.value != "sa":
@@ -665,7 +665,7 @@ class Parser(object):
         """prep_phrase : PREP (PREP)? noun_phrase_part (ADV_SPE)? (prep_phrase)?
         | empty
         """
-        if TOKEN_PREP in self.current_token.type:
+        if TOKEN_PREP in self.current_token.types:
             prep = self.current_token
             self.eat(TOKEN_PREP)
             return self.prep_phrase_add(prep)
@@ -673,7 +673,7 @@ class Parser(object):
             return None
 
     def prep_phrase_add(self, prep):
-        if TOKEN_PREP in self.current_token.type:
+        if TOKEN_PREP in self.current_token.types:
             second = self.current_token
             self.eat(TOKEN_PREP)
         else:
@@ -683,17 +683,17 @@ class Parser(object):
             self.errors.append(
                 Error(
                     "No noun phrase after preposition; type of speech found: "
-                    + " ".join(self.current_token.type),
+                    + " ".join(self.current_token.types),
                     "Must be a noun phrase after preposition",
                     self.current_token.value,
                 )
             )
-        if TOKEN_ADV_SPE in self.current_token.type:
+        if TOKEN_ADV_SPE in self.current_token.types:
             adv = self.current_token
             self.eat(TOKEN_ADV_SPE)
         else:
             adv = None
-        if TOKEN_PREP in self.current_token.type:
+        if TOKEN_PREP in self.current_token.types:
             extra = self.prep_phrase()
             return PrepPhrase(
                 Word(prep, TOKEN_PREP),
@@ -709,12 +709,12 @@ class Parser(object):
         """date : MONTH DAY (COMMA YEAR)?
         | IKA DASH DAY sa MONTH (COMMA YEAR)?
         """
-        if TOKEN_MONTH in self.current_token.type:
+        if TOKEN_MONTH in self.current_token.types:
             month = self.current_token
             self.eat(TOKEN_MONTH)
             day = self.current_token
             self.eat(TOKEN_NUM)
-            if TOKEN_COMMA in self.current_token.type:
+            if TOKEN_COMMA in self.current_token.types:
                 com = self.current_token
                 self.eat(TOKEN_COMMA)
                 year = self.current_token
@@ -733,7 +733,7 @@ class Parser(object):
 
     def date_spanish(self, one, two, day):
         one.content.value = one.content.value[:-1]
-        if TOKEN_PREP in self.current_token.type and self.current_token.value == "sa":
+        if TOKEN_PREP in self.current_token.types and self.current_token.value == "sa":
             sa = self.current_token
             self.eat(TOKEN_PREP)
         else:
@@ -748,7 +748,7 @@ class Parser(object):
         ex = [one, two]
         month = self.current_token
         self.eat(TOKEN_MONTH)
-        if TOKEN_COMMA in self.current_token.type:
+        if TOKEN_COMMA in self.current_token.types:
             com = self.current_token
             self.eat(TOKEN_COMMA)
             year = self.current_token
@@ -848,12 +848,12 @@ class Parser(object):
         | noun_phrase CONJ noun_phrase
         """
         left = self.noun_phrase()
-        if TOKEN_COMMA in self.current_token.type:
+        if TOKEN_COMMA in self.current_token.types:
             conjunct = self.current_token
             self.eat(TOKEN_COMMA)
             right = self.noun_phrase_part()
             return NounPhrasePart(left, Word(conjunct, TOKEN_COMMA), right)
-        elif TOKEN_CONJ in self.current_token.type:
+        elif TOKEN_CONJ in self.current_token.types:
             conjunct = self.current_token
             self.eat(TOKEN_CONJ)
             right = self.noun_phrase()
@@ -863,7 +863,7 @@ class Parser(object):
 
     def noun_phrase_extras(self, ordinal=None):
         number = self.adj_num()
-        if TOKEN_MGA in self.current_token.type:
+        if TOKEN_MGA in self.current_token.types:
             noun = self.noun_plural()
             return NounPhraseSingularPlural("Plural", noun, None, ordinal, number)
         else:
@@ -876,13 +876,13 @@ class Parser(object):
         | number
         | empty
         """
-        if TOKEN_IKA in self.current_token.type:
+        if TOKEN_IKA in self.current_token.types:
             ika = Word(self.current_token, TOKEN_IKA)
             self.eat(TOKEN_IKA)
             dash = Word(Token([TOKEN_DASH], "-"), TOKEN_DASH)
             number = self.current_token
             self.eat(TOKEN_NUM)
-            if TOKEN_NGA in self.current_token.type:
+            if TOKEN_NGA in self.current_token.types:
                 nga = self.current_token
                 self.eat(TOKEN_NGA)
                 adj = AdjOrd(ika, dash, Word(number, TOKEN_NUM), Word(nga, TOKEN_NGA))
@@ -890,9 +890,9 @@ class Parser(object):
                     return self.noun_phrase_extras(adj)
             else:
                 return self.date_spanish(ika, dash, number)
-        elif TOKEN_MONTH in self.current_token.type:
+        elif TOKEN_MONTH in self.current_token.types:
             return self.date()
-        elif TOKEN_DET in self.current_token.type and self.current_token.value == "ang":
+        elif TOKEN_DET in self.current_token.types and self.current_token.value == "ang":
             noun = self.noun_phrase_ang()
             return self.noun_prep_phrase_nga(noun)
         elif self.contain([TOKEN_KA, TOKEN_NUM, TOKEN_ADJ]):
@@ -905,20 +905,20 @@ class Parser(object):
         ):
             noun = self.noun_phrase_plural()
             return self.noun_prep_phrase_nga(noun)
-        elif TOKEN_PRON_DEM in self.current_token.type:
+        elif TOKEN_PRON_DEM in self.current_token.types:
             noun = self.dem_pron()
             return self.noun_prep_phrase_nga(noun)
         else:
             return None
 
     def noun_prep_phrase_nga(self, noun):
-        if TOKEN_NGA in self.current_token.type:
+        if TOKEN_NGA in self.current_token.types:
             nga = Word(self.current_token, TOKEN_NGA)
             self.eat(TOKEN_NGA)
             other = self.sentence()
         else:
             nga = other = None
-        prep_phrase = self.prep_phrase() if TOKEN_PREP in self.current_token.type else None
+        prep_phrase = self.prep_phrase() if TOKEN_PREP in self.current_token.types else None
         return NounPhrase(noun, prep_phrase, nga, other)
 
     def noun_phrase_singular(self):
@@ -926,10 +926,10 @@ class Parser(object):
         | PRON_PER (CLIT_Y)?
         | PRON_POS_NG (noun_singular|noun_plural)
         """
-        if TOKEN_PRON_PER in self.current_token.type:
+        if TOKEN_PRON_PER in self.current_token.types:
             personal = self.current_token
             self.eat(TOKEN_PRON_PER)
-            if TOKEN_CLIT_Y in self.current_token.type:
+            if TOKEN_CLIT_Y in self.current_token.types:
                 clit = Word(self.current_token, TOKEN_CLIT_Y)
                 self.eat(TOKEN_CLIT_Y)
             else:
@@ -937,22 +937,22 @@ class Parser(object):
             return NounPhraseSingularPlural(
                 "Singular", Word(personal, TOKEN_PRON_PER), extra=clit
             )
-        elif TOKEN_PRON_POS_NG in self.current_token.type:
+        elif TOKEN_PRON_POS_NG in self.current_token.types:
             pos = self.current_token
             self.eat(TOKEN_PRON_POS_NG)
             noun = (
                 self.noun_plural()
-                if TOKEN_MGA in self.current_token.type
+                if TOKEN_MGA in self.current_token.types
                 else self.noun_singular()
             )
             return NounPhraseSingularPlural("Singular", noun, Word(pos, TOKEN_PRON_POS_NG))
         else:
-            if TOKEN_DET in self.current_token.type:
+            if TOKEN_DET in self.current_token.types:
                 det = self.current_token
                 self.eat(TOKEN_DET)
             else:
                 det = None
-            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.type else None
+            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.types else None
             number = self.adj_num()
             noun = self.noun_singular()
             return NounPhraseSingularPlural(
@@ -964,10 +964,10 @@ class Parser(object):
         | PRON_PER_PLURAL (CLIT_Y)?
         | PRON_POS_PLURAL_NG (noun_singular|noun_plural)
         """
-        if TOKEN_PRON_PER_PLURAL in self.current_token.type:
+        if TOKEN_PRON_PER_PLURAL in self.current_token.types:
             personal = self.current_token
             self.eat(TOKEN_PRON_PER_PLURAL)
-            if TOKEN_CLIT_Y in self.current_token.type:
+            if TOKEN_CLIT_Y in self.current_token.types:
                 clit = Word(self.current_token, TOKEN_CLIT_Y)
                 self.eat(TOKEN_CLIT_Y)
             else:
@@ -975,24 +975,24 @@ class Parser(object):
             return NounPhraseSingularPlural(
                 "Plural", Word(personal, TOKEN_PRON_PER_PLURAL), extra=clit
             )
-        elif TOKEN_PRON_POS_PLURAL_NG in self.current_token.type:
+        elif TOKEN_PRON_POS_PLURAL_NG in self.current_token.types:
             pos = self.current_token
             self.eat(TOKEN_PRON_POS_PLURAL_NG)
             noun = (
                 self.noun_plural()
-                if TOKEN_MGA in self.current_token.type
+                if TOKEN_MGA in self.current_token.types
                 else self.noun_singular()
             )
             return NounPhraseSingularPlural(
                 "Plural", noun, Word(pos, TOKEN_PRON_POS_PLURAL_NG)
             )
         else:
-            if TOKEN_DET_PLURAL in self.current_token.type:
+            if TOKEN_DET_PLURAL in self.current_token.types:
                 det = self.current_token
                 self.eat(TOKEN_DET_PLURAL)
             else:
                 det = None
-            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.type else None
+            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.types else None
             number = self.adj_num()
             noun = self.noun_plural(det)
             return NounPhraseSingularPlural(
@@ -1003,12 +1003,12 @@ class Parser(object):
         """dem_pron : PRON_DEM (CLIT_NG (adj_ord)? (adj_num)? (noun_singular | noun_plural))?"""
         dem = self.current_token
         self.eat(TOKEN_PRON_DEM)
-        if TOKEN_CLIT_NG in self.current_token.type:
+        if TOKEN_CLIT_NG in self.current_token.types:
             clit = self.current_token
             self.eat(TOKEN_CLIT_NG)
-            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.type else None
+            ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.types else None
             number = self.adj_num()
-            if TOKEN_MGA in self.current_token.type:
+            if TOKEN_MGA in self.current_token.types:
                 noun = self.noun_plural()
                 return DemPronoun(
                     "Plural",
@@ -1038,19 +1038,19 @@ class Parser(object):
         ang = self.current_token
         self.eat(TOKEN_DET)
         poss = None
-        if TOKEN_PRON_POS_NG in self.current_token.type:
+        if TOKEN_PRON_POS_NG in self.current_token.types:
             poss = self.current_token
             self.eat(TOKEN_PRON_POS_NG)
-        elif TOKEN_PRON_POS_PLURAL_NG in self.current_token.type:
+        elif TOKEN_PRON_POS_PLURAL_NG in self.current_token.types:
             poss = self.current_token
             self.eat(TOKEN_PRON_POS_PLURAL_NG)
-        ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.type else None
+        ordinal = self.adj_ord() if TOKEN_IKA in self.current_token.types else None
         number = (
             self.adj_num()
-            if TOKEN_NUM in self.current_token.type or self.current_token.value == "ka"
+            if TOKEN_NUM in self.current_token.types or self.current_token.value == "ka"
             else None
         )
-        if TOKEN_MGA in self.current_token.type:
+        if TOKEN_MGA in self.current_token.types:
             noun = self.noun_plural()
             return NounPhraseSingularPlural(
                 "Plural",
@@ -1073,14 +1073,14 @@ class Parser(object):
 
     def noun_singular(self):
         """noun_singular : (adjective)? (NOUN)+ (possess_singular|possess_plural|possess_general)?"""
-        adj = self.adjective() if TOKEN_ADJ in self.current_token.type else None
+        adj = self.adjective() if TOKEN_ADJ in self.current_token.types else None
         nouns = []
-        while TOKEN_NOUN in self.current_token.type:
+        while TOKEN_NOUN in self.current_token.types:
             nouns.append(Word(self.current_token, TOKEN_NOUN))
             self.eat(TOKEN_NOUN)
-        if TOKEN_PRON_POS_N in self.current_token.type:
+        if TOKEN_PRON_POS_N in self.current_token.types:
             poss = self.possess_singular()
-        elif TOKEN_PRON_POS_PLURAL_N in self.current_token.type:
+        elif TOKEN_PRON_POS_PLURAL_N in self.current_token.types:
             poss = self.possess_plural()
         else:
             poss = self.possess_general()
@@ -1093,14 +1093,14 @@ class Parser(object):
             self.eat(TOKEN_MGA)
         else:
             mga = None
-        adj = self.adjective() if TOKEN_ADJ in self.current_token.type else None
+        adj = self.adjective() if TOKEN_ADJ in self.current_token.types else None
         nouns = []
-        while TOKEN_NOUN in self.current_token.type:
+        while TOKEN_NOUN in self.current_token.types:
             nouns.append(Word(self.current_token, TOKEN_NOUN))
             self.eat(TOKEN_NOUN)
-        if TOKEN_PRON_POS_N in self.current_token.type:
+        if TOKEN_PRON_POS_N in self.current_token.types:
             poss = self.possess_singular()
-        elif TOKEN_PRON_POS_PLURAL_N in self.current_token.type:
+        elif TOKEN_PRON_POS_PLURAL_N in self.current_token.types:
             poss = self.possess_plural()
         else:
             poss = self.possess_general()
@@ -1108,7 +1108,7 @@ class Parser(object):
 
     def possess_general(self):
         """possess_general : POS_LINK compound_nouns"""
-        if TOKEN_POS_LINK in self.current_token.type:
+        if TOKEN_POS_LINK in self.current_token.types:
             pos_link = self.current_token
             self.eat(TOKEN_POS_LINK)
             if pos_link.value == "sa" and self.contain(
@@ -1155,7 +1155,7 @@ class Parser(object):
         | (noun_singular|noun_plural) COMMA compound_noun()
         | (noun_singular|noun_plural) UG (noun_singular|noun_plural)
         """
-        if kind.value == "ni" and TOKEN_MGA in self.current_token.type:
+        if kind.value == "ni" and TOKEN_MGA in self.current_token.types:
             self.errors.append(
                 Error(
                     "Misappropriate use of possessive linker",
@@ -1165,10 +1165,10 @@ class Parser(object):
             )
         noun = (
             self.noun_plural()
-            if TOKEN_MGA in self.current_token.type
+            if TOKEN_MGA in self.current_token.types
             else self.noun_singular()
         )
-        if TOKEN_COMMA in self.current_token.type:
+        if TOKEN_COMMA in self.current_token.types:
             extra = self.current_token
             self.eat(TOKEN_COMMA)
             other = self.compound_nouns("")
@@ -1178,7 +1178,7 @@ class Parser(object):
             self.eat(TOKEN_CONJ)
             other = (
                 self.noun_plural()
-                if TOKEN_MGA in self.current_token.type
+                if TOKEN_MGA in self.current_token.types
                 else self.noun_singular()
             )
             return CompoundNoun("", noun, other, Word(extra, TOKEN_CONJ))
@@ -1200,10 +1200,10 @@ class Parser(object):
         """adj_num : NUM KA
         | KA NUM AN (UG NUM)? KA
         """
-        if TOKEN_NUM in self.current_token.type:
+        if TOKEN_NUM in self.current_token.types:
             number = self.current_token
             self.eat(TOKEN_NUM)
-            if TOKEN_PRON_PER in self.current_token.type:
+            if TOKEN_PRON_PER in self.current_token.types:
                 ka = self.current_token
                 self.eat(TOKEN_PRON_PER)
                 return AdjNum(Word(number, TOKEN_NUM), Word(ka, TOKEN_KA))
@@ -1238,13 +1238,13 @@ class Parser(object):
         adjectives.append(Word(current, TOKEN_ADJ))
         self.eat(TOKEN_ADJ)
         extra = stemmer.stem_word(current.value, as_object=True).prefix
-        while TOKEN_NGA in self.current_token.type or extra == "ng":
-            if TOKEN_NGA in self.current_token.type:
+        while TOKEN_NGA in self.current_token.types or extra == "ng":
+            if TOKEN_NGA in self.current_token.types:
                 nga.append(Word(self.current_token, TOKEN_NGA))
                 self.eat(TOKEN_NGA)
             else:
                 nga.append(Word(Token(["NG_PREFIX"], extra), "NG_PREFIX"))
-            if TOKEN_ADJ in self.current_token.type:
+            if TOKEN_ADJ in self.current_token.types:
                 current = self.current_token
                 extra = stemmer.stem_word(current.value, as_object=True).prefix
                 adjectives.append(Word(current, TOKEN_ADJ))
