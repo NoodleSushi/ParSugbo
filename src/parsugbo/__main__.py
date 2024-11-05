@@ -1,18 +1,13 @@
+import argparse
 from .parser import Parser
 from .visitors import SemanticAnalyzer
-import os
 
 
-def main():
-    text = (
-        open(os.path.join(os.path.dirname(__file__), "cebuano.txt"), "r").read().lower()
-    )
-
+def run_parser(text: str):
     parser = Parser()
     errors, tree = parser.parse(text)
 
     long = len(parser.errors)
-    print(text)
     if long == 0:
         print("No errors")
     for x in range(long):
@@ -35,4 +30,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", type=str, help="input string")
+    args = parser.parse_args()
+    run_parser(args.input)
