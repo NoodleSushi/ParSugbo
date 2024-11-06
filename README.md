@@ -35,7 +35,7 @@ pip install pdm
 To run the project, use the following command:
 
 ```sh
-pdm run python -m parsugbo "ang bata naligo sa sapa"
+pdm run python -m parsugbo --input "ang bata naligo sa sapa"
 ```
 
 ```txt
